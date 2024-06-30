@@ -1,19 +1,28 @@
 #!/usr/bin/env bash
-echo "Running composer"
-composer global require hirak/prestissimo
+
+echo "Updating Composer to version 2..."
+composer self-update --2
+
+echo "Running composer..."
 composer install --no-dev --verbose --working-dir=/var/www/html
 
-echo "generating application key..."
-php artisan key:generate --show
+# Check if the vendor autoload file exists
+if [ ! -f /var/www/html/vendor/autoload.php ]; then
+    echo "Composer install failed or autoload file not found."
+    exit 1
+fi
+
+echo "Generating application key..."
+php /var/www/html/artisan key:generate --show
 
 echo "Caching config..."
-php artisan config:cache
+php /var/www/html/artisan config:cache
 
 echo "Caching routes..."
-php artisan route:cache
+php /var/www/html/artisan route:cache
 
 echo "Running migrations..."
-php artisan migrate --force
+php /var/www/html/artisan migrate --force
 
 echo "Running seed..."
-php artisan db:seed
+php /var/www/html/artisan db:seed
